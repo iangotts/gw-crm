@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api, errorText } from './api';
+import { tagLabel } from './activity';
 
 interface Summary {
   subscribed: number;
@@ -127,7 +128,9 @@ export function Subscribers({ canExport, tags, onClose }: { canExport: boolean; 
                     <select id="ex-tag" value={tag} onChange={(e) => setTag(e.target.value)}>
                       <option value="">Any tag</option>
                       {tags.map((t) => (
-                        <option key={t}>{t}</option>
+                        <option key={t} value={t}>
+                          {tagLabel(t)}
+                        </option>
                       ))}
                     </select>
                   </div>

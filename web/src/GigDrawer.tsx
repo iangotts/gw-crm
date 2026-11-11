@@ -51,6 +51,15 @@ interface Props {
   onArchived: (id: string, title: string) => void;
 }
 
+
+/** The drawer is long, so a row of buttons at the top jumps to each part. */
+const JUMPS: [string, string][] = [
+  ['gig-details', 'Details'],
+  ['gig-followup', 'Follow-up'],
+  ['gig-money', 'Money'],
+  ['gig-activity', 'Activity'],
+  ['gig-links', 'Links'],
+];
 export function GigDrawer({ id, canEdit, onClose, onSaved, onArchived }: Props) {
   const [detail, setDetail] = useState<GigDetail | null>(null);
   const [form, setForm] = useState<Form>({});
@@ -149,7 +158,14 @@ export function GigDrawer({ id, canEdit, onClose, onSaved, onArchived }: Props) 
 
         {detail && (
           <div className="sheet-body">
-            <div className="section" style={{ borderTop: 0 }}>
+            <nav className="jump" aria-label="Sections of this gig">
+              {JUMPS.map(([target, label]) => (
+                <button key={target} type="button" onClick={() => document.getElementById(target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+                  {label}
+                </button>
+              ))}
+            </nav>
+            <div className="section" id="gig-details" style={{ borderTop: 0 }}>
               {text('title', 'Gig name')}
               <div className="grid-2">
                 <div className="field">
@@ -196,11 +212,9 @@ export function GigDrawer({ id, canEdit, onClose, onSaved, onArchived }: Props) 
               </div>
             </div>
 
-            <div className="section">
-              <h3>Money and follow-up</h3>
+            <div className="section" id="gig-followup">
+              <h3>Follow-up</h3>
               <div className="grid-2">
-                {text('fee_quoted', 'Fee quoted ($)', 'number', { step: '0.01' })}
-                {text('fee_note', 'Fee note', 'text', { hint: 'For example + travel, or 50% of door' })}
                 {text('reply_owed_by', 'Reply owed by', 'date')}
                 {text('next_action_at', 'Follow up on', 'datetime-local')}
               </div>
@@ -252,16 +266,21 @@ export function GigDrawer({ id, canEdit, onClose, onSaved, onArchived }: Props) 
               </div>
             </div>
 
-            <MoneyPanel gigId={id} canEdit={canEdit} feeKey={`${detail.updated_at}|${detail.fee_quoted}`} onChange={() => setLogKey((n) => n + 1)} />
+            <MoneyPanel id="gig-money" gigId={id} canEdit={canEdit} feeKey={`${detail.updated_at}|${detail.fee_quoted}`} onChange={() => setLogKey((n) => n + 1)}>
+              <div className="grid-2">
+                {text('fee_quoted', 'Fee quoted ($)', 'number', { step: '0.01' })}
+                {text('fee_note', 'Fee note', 'text', { hint: 'For example + travel, or 50% of door' })}
+              </div>
+            </MoneyPanel>
 
             <CalendarPanel gigId={id} canEdit={canEdit} refresh={`${detail.updated_at}|${detail.stage}`} />
 
-            <div className="section">
+            <div className="section" id="gig-activity">
               <h3>Activity</h3>
               <ActivityLog gigId={id} canEdit={canEdit} contactName={detail.contact_name} gigTitle={detail.title} refresh={logKey} />
             </div>
 
-            <div className="section">
+            <div className="section" id="gig-links">
               <h3>Links</h3>
               <LinkBuilder gigId={id} gigTitle={detail.title} canEdit={canEdit} onChange={() => setLogKey((n) => n + 1)} />
             </div>

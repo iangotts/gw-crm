@@ -5,7 +5,9 @@ export const dollars = (s: string | null | undefined): string => {
   if (s == null || s === '') return '';
   const n = Number(s);
   if (!Number.isFinite(n)) return '';
-  return `${n < 0 ? '-' : ''}$${Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  // Whole dollars show without cents ("$2,500"), the same as the pipeline cards.
+  const cents = Math.abs(n) % 1 === 0 ? 0 : 2;
+  return `${n < 0 ? '-' : ''}$${Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: cents, maximumFractionDigits: 2 })}`;
 };
 
 export const STATE_LABEL: Record<PayState, string> = {

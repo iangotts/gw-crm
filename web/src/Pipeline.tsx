@@ -3,10 +3,11 @@ import { api, errorText } from './api';
 import { GigCard } from './GigCard';
 import { GigDrawer } from './GigDrawer';
 import { NewGigDialog } from './NewGigDialog';
-import { groupByStage, STAGES, stageLabel, todayIso } from './stages';
+import { groupByStage, orderColumn, STAGES, stageLabel, todayIso } from './stages';
 import type { Gig, Role, StageKey } from './types';
 
 // Played and lost fill up over the years, so they show the latest few until asked for more.
+// Open leads whose date has passed are folded away the same way (see orderColumn).
 const COLLAPSED: StageKey[] = ['played', 'lost'];
 const COLLAPSED_COUNT = 8;
 
@@ -127,10 +128,13 @@ export function Pipeline({ role }: { role: Role }) {
       <div className="board">
         {STAGES.map((s) => {
           const all = grouped[s.key];
-          const collapsible = COLLAPSED.includes(s.key) && !expanded.has(s.key) && all.length > COLLAPSED_COUNT;
-          // Newest dates first for finished stages, so "latest" means latest.
-          const ordered = COLLAPSED.includes(s.key) ? [...all].sort((a, b) => (b.event_date ?? '').localeCompare(a.event_date ?? '')) : all;
-          const shown = collapsible ? ordered.slice(0, COLLAPSED_COUNT) : ordered;
+          const open = expanded.has(s.key);
+          const ordered = orderColumn(s.key, all, today);
+          const collapsible = COLLAPSED.includes(s.key) && !open && ordered.shown.length > COLLAPSED_COUNT;
+          // Leads whose date has passed stay folded away unless asked for, or when searching.
+          const showPast = open || query !== '';
+          const list = showPast ? [...ordered.shown, ...ordered.past] : ordered.shown;
+          const shown = collapsible ? list.slice(0, COLLAPSED_COUNT) : list;
           return (
             <section
               key={s.key}
@@ -177,6 +181,23 @@ export function Pipeline({ role }: { role: Role }) {
                   Show all {all.length}
                 </button>
               )}
+              {ordered.past.length > 0 && !query && (
+                <button
+                  className="btn btn-secondary more"
+                  aria-expanded={open}
+                  onClick={() =>
+                    setExpanded((e) => {
+                      const next = new Set(e);
+                      if (open) next.delete(s.key);
+                      else next.add(s.key);
+                      return next;
+                    })
+                  }
+                >
+                  {open ? 'Hide past dates' : `Show ${ordered.past.length} with past dates`}
+                </button>
+              )}
+              {all.length > 0 && shown.length === 0 && <p className="empty">Nothing with an upcoming date.</p>}
               {all.length === 0 && loaded && (
                 <p className="empty">{query ? 'No matching gigs.' : s.key === 'new' && canEdit ? 'No new leads. Add one with New gig.' : 'Nothing here.'}</p>
               )}

@@ -669,6 +669,32 @@ textarea {
   padding: 8px 20px 20px;
   flex: 1;
 }
+/* Jump buttons at the top of the gig drawer. Sections leave room for the sticky header when jumped to. */
+.jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 0 4px;
+}
+.jump button {
+  background: var(--dim);
+  border: 0.5pt solid var(--gold);
+  border-radius: 999px;
+  padding: 4px 12px;
+  min-height: 32px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+}
+.jump button:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 2px;
+}
+.sheet .section {
+  scroll-margin-top: 80px;
+}
 .sheet-foot {
   position: sticky;
   bottom: 0;

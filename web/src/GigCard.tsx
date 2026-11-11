@@ -19,7 +19,9 @@ export function GigCard({ gig, today, canEdit, dragging, onOpen, onMove, onDragS
   const fee = feeText(gig);
   const flags = flagsFor(gig, today);
   const pay = payChip(gig.stage, gig.pay_state);
-  const sub = [gig.venue_name, gig.contact_name].filter(Boolean);
+  // Many festival gigs are named after their venue, so don't repeat it under the title.
+  const sameAsTitle = gig.venue_name?.trim().toLowerCase() === gig.title.trim().toLowerCase();
+  const sub = [sameAsTitle ? null : gig.venue_name, gig.contact_name].filter(Boolean);
 
   return (
     <article
@@ -57,7 +59,11 @@ export function GigCard({ gig, today, canEdit, dragging, onOpen, onMove, onDragS
         </button>
         {(fee || pay || gig.platform || flags.length > 0) && (
           <div className="chips">
-            {fee && <span className="chip money">{fee}</span>}
+            {fee && (
+              <span className="chip money" title={gig.fee_note ?? undefined}>
+                {fee}
+              </span>
+            )}
             {pay && <span className={`chip${pay.alert ? ' alert' : ''}`}>{pay.text}</span>}
             {flags.map((f) => (
               <span key={f.text} className={`chip${f.tone === 'alert' ? ' alert' : ''}`}>

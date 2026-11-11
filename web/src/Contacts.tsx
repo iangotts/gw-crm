@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ago, contactName } from './activity';
+import { ago, contactName, tagLabel } from './activity';
 import { api, errorText } from './api';
 import { Subscribers } from './Subscribers';
 import { ContactDrawer } from './ContactDrawer';
@@ -111,7 +111,7 @@ export function Contacts({ role }: { role: Role }) {
           </button>
           {tags.slice(0, 12).map((t) => (
             <button key={t.tag} className="tag-btn" aria-pressed={tag === t.tag} onClick={() => setTag(tag === t.tag ? '' : t.tag)}>
-              {t.tag} <small>{t.n}</small>
+              {tagLabel(t.tag)} <small>{t.n}</small>
             </button>
           ))}
         </div>
@@ -139,7 +139,7 @@ export function Contacts({ role }: { role: Role }) {
               <span className="chips">
                 {c.tags.slice(0, 3).map((t) => (
                   <span key={t} className="chip">
-                    {t}
+                    {tagLabel(t)}
                   </span>
                 ))}
                 {c.subscription && c.subscription !== 'subscribed' && <span className="chip alert">Do not email</span>}

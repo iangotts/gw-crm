@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { api, errorText } from './api';
 import { dollars, STATE_LABEL, validAmount, type PayState } from './money';
 import { shortDate, todayIso } from './stages';
@@ -23,8 +23,18 @@ interface Money {
 }
 const KIND = { deposit: 'Deposit', balance: 'Balance', other: 'Payment' } as const;
 
+interface Props {
+  gigId: string;
+  canEdit: boolean;
+  feeKey: string;
+  onChange: () => void;
+  /** The drawer's fee fields, shown at the top so the fee is set and read in one place. */
+  children?: ReactNode;
+  id?: string;
+}
+
 /** On a gig: the fee, what is due, what has come in, and who paid when. All sums come from the database. */
-export function MoneyPanel({ gigId, canEdit, feeKey, onChange }: { gigId: string; canEdit: boolean; feeKey: string; onChange: () => void }) {
+export function MoneyPanel({ gigId, canEdit, feeKey, onChange, children, id }: Props) {
   const [m, setM] = useState<Money | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -63,14 +73,23 @@ export function MoneyPanel({ gigId, canEdit, feeKey, onChange }: { gigId: string
     }
   };
 
-  if (!m) return error ? <div className="section"><h3>Money</h3><p className="error-text" role="alert">{error}</p></div> : null;
+  if (!m) {
+    return (
+      <div className="section" id={id}>
+        <h3>Money</h3>
+        {children}
+        {error ? <p className="error-text" role="alert">{error}</p> : <p className="hint">Loading</p>}
+      </div>
+    );
+  }
   const hasFee = m.fee !== null && Number(m.fee) > 0;
 
   return (
-    <div className="section">
+    <div className="section" id={id}>
       <h3>Money</h3>
+      {children}
       <dl className="money-sum">
-        <div><dt>Fee</dt><dd>{hasFee ? dollars(m.fee) : 'Not set'}</dd></div>
+        {!children && <div><dt>Fee</dt><dd>{hasFee ? dollars(m.fee) : 'Not set'}</dd></div>}
         <div><dt>Received</dt><dd>{dollars(m.received)}</dd></div>
         <div><dt>Still to come</dt><dd>{dollars(m.outstanding)}</dd></div>
         <div><dt>Status</dt><dd><span className={`chip${m.state === 'paid' ? '' : ' money'}`}>{STATE_LABEL[m.state]}</span></dd></div>

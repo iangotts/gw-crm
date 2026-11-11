@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ago, hasUnfilled, contactName, dueText, dueTone, renderTemplate } from './activity';
+import { ago, hasUnfilled, contactName, dueText, dueTone, renderTemplate, tagLabel } from './activity';
 
 const now = new Date(2026, 10, 5, 15, 0); // Nov 5 2026, 3pm local
 
@@ -37,6 +37,7 @@ describe('due dates', () => {
   it('words them', () => {
     expect(dueText(new Date(2026, 10, 2, 9, 0).toISOString(), now)).toBe('Overdue by 3 days');
     expect(dueText(new Date(2026, 10, 4, 9, 0).toISOString(), now)).toBe('Overdue by 1 day');
+    expect(dueText(new Date(2024, 9, 1, 9, 0).toISOString(), now)).toBe('Overdue since Oct 2024');
     expect(dueText(new Date(2026, 10, 5, 9, 0).toISOString(), now)).toBe('Today');
     expect(dueText(new Date(2026, 10, 6, 9, 0).toISOString(), now)).toBe('Tomorrow');
     expect(dueText(new Date(2026, 10, 9, 9, 0).toISOString(), now)).toMatch(/Mon, Nov 9/);
@@ -56,5 +57,13 @@ describe('hasUnfilled', () => {
     expect(hasUnfilled('Hi {first_name}')).toBe(true);
     expect(hasUnfilled('Hi Priya, {unknown} stays')).toBe(false);
     expect(hasUnfilled('Hi Priya')).toBe(false);
+  });
+});
+
+describe('tagLabel', () => {
+  it('reads like words', () => {
+    expect(tagLabel('event-organizer')).toBe('Event organizer');
+    expect(tagLabel('fan')).toBe('Fan');
+    expect(tagLabel('rocksolid')).toBe('ROCKSOLID');
   });
 });

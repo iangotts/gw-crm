@@ -44,6 +44,9 @@ export function Login({ onDone }: { onDone: (me: Me) => void }) {
           <button className="btn btn-primary" disabled={busy}>
             {busy ? 'Signing in' : 'Sign in'}
           </button>
+          <p className="hint" style={{ margin: 0 }}>
+            Forgotten your password? Ask your band's admin to set a new one.
+          </p>
         </div>
       </form>
     </div>

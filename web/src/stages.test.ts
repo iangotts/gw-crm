@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dateParts, feeText, flagsFor, groupByStage, isBefore, money, shortDate, todayIso } from './stages';
+import { dateParts, feeText, flagsFor, groupByStage, isBefore, money, orderColumn, shortDate, todayIso } from './stages';
 import type { Gig } from './types';
 
 const gig = (over: Partial<Gig> = {}): Gig => ({
@@ -48,11 +48,14 @@ describe('dates and money', () => {
 });
 
 describe('feeText', () => {
-  it('prefers the quote and appends its note', () => {
-    expect(feeText(gig({ fee_quoted: '1800.00', fee_note: '+ travel' }))).toBe('$1,800 + travel');
+  it('shows the quote alone and leaves its note for the drawer', () => {
+    expect(feeText(gig({ fee_quoted: '1800.00', fee_note: '+ travel' }))).toBe('$1,800');
   });
-  it('shows a note on its own, such as door deals', () => {
+  it('shows a short note on its own, such as door deals', () => {
     expect(feeText(gig({ fee_note: '50% of door' }))).toBe('50% of door');
+  });
+  it('cuts a long note to fit the card', () => {
+    expect(feeText(gig({ fee_note: '2500 + GS fee of $250 and parking' }))).toBe('2500 + GS fee of $250 a…');
   });
   it('falls back to the budget, then to nothing', () => {
     expect(feeText(gig({ budget: '2500.00' }))).toBe('Budget $2,500');
@@ -75,5 +78,50 @@ describe('flagsFor', () => {
   });
   it('shows postponed', () => {
     expect(flagsFor(gig({ stage: 'confirmed', postponed: true }), today)[0]?.text).toBe('Postponed');
+  });
+});
+
+describe('date flags', () => {
+  const today = '2026-11-10';
+  const booked = { stage: 'confirmed' as const, start_time: '16:00:00', contact_id: 'c', fee_quoted: '2000.00' };
+  it('asks whether a booked gig in the past was played', () => {
+    expect(flagsFor(gig({ ...booked, event_date: '2026-04-23' }), today).map((f) => f.text)).toEqual(['Played?']);
+  });
+  it('does not ask about a postponed gig', () => {
+    expect(flagsFor(gig({ ...booked, event_date: '2026-04-23', postponed: true }), today).map((f) => f.text)).toEqual(['Postponed']);
+  });
+  it('flags an open lead whose date has passed', () => {
+    expect(flagsFor(gig({ event_date: '2025-06-07' }), today).map((f) => f.text)).toEqual(['Past date']);
+    expect(flagsFor(gig({ event_date: '2026-12-01' }), today)).toEqual([]);
+  });
+  it('flags an upcoming booked gig that is missing a start time, contact or fee', () => {
+    expect(flagsFor(gig({ ...booked, event_date: '2026-12-12' }), today)).toEqual([]);
+    expect(flagsFor(gig({ ...booked, event_date: '2026-12-12', start_time: null }), today).map((f) => f.text)).toEqual(['Missing details']);
+    expect(flagsFor(gig({ ...booked, event_date: null }), today).map((f) => f.text)).toEqual(['Missing details']);
+  });
+});
+
+describe('orderColumn', () => {
+  const today = '2026-11-10';
+  const ids = (l: Gig[]): string[] => l.map((g) => g.id);
+  const gigs = [
+    gig({ id: 'old', event_date: '2025-06-07' }),
+    gig({ id: 'later', event_date: '2027-01-15' }),
+    gig({ id: 'none' }),
+    gig({ id: 'soon', event_date: '2026-11-20' }),
+    gig({ id: 'older', event_date: '2024-11-09' }),
+  ];
+  it('puts upcoming leads first, soonest at the top, and keeps past ones apart, newest first', () => {
+    const o = orderColumn('new', gigs, today);
+    expect(ids(o.shown)).toEqual(['soon', 'later', 'none']);
+    expect(ids(o.past)).toEqual(['old', 'older']);
+  });
+  it('puts past booked gigs first so they get marked played', () => {
+    const o = orderColumn('confirmed', gigs.map((g) => ({ ...g, stage: 'confirmed' as const })), today);
+    expect(ids(o.shown)).toEqual(['older', 'old', 'soon', 'later', 'none']);
+    expect(o.past).toEqual([]);
+  });
+  it('shows played gigs newest first', () => {
+    expect(ids(orderColumn('played', gigs, today).shown)).toEqual(['later', 'soon', 'old', 'older', 'none']);
   });
 });

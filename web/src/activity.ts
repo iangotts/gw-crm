@@ -29,6 +29,16 @@ export function renderTemplate(text: string, vars: Partial<Record<'first_name' |
 /** True while a {first_name}, {name}, {band} or {gig} is still in the text. */
 export const hasUnfilled = (text: string): boolean => /\{(first_name|name|band|gig)\}/.test(text);
 
+/**
+ * A tag as people read it: "event-organizer" shows as "Event organizer". The band tag "rocksolid" shows as
+ * the band writes its name. Only the display changes; the stored tag stays as it is.
+ */
+export function tagLabel(tag: string): string {
+  if (tag.toLowerCase() === 'rocksolid') return 'ROCKSOLID';
+  const words = tag.replace(/[-_]+/g, ' ').trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
 export function contactName(c: Pick<ContactRow, 'first_name' | 'last_name' | 'email'>): string {
   return [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email || 'No name';
 }
@@ -58,9 +68,10 @@ export function dueTone(iso: string, now: Date = new Date()): Due {
   return diff < 0 ? 'overdue' : diff === 0 ? 'today' : 'later';
 }
 
-/** "Overdue by 3 days", "Today", "Tomorrow" or "Fri, Nov 6". */
+/** "Overdue by 3 days" (or "Overdue since Oct 2024" after a month), "Today", "Tomorrow" or "Fri, Nov 6". */
 export function dueText(iso: string, now: Date = new Date()): string {
   const diff = dayNumber(dayKey(new Date(iso))) - dayNumber(dayKey(now));
+  if (diff < -30) return `Overdue since ${new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
   if (diff < 0) return diff === -1 ? 'Overdue by 1 day' : `Overdue by ${-diff} days`;
   if (diff === 0) return 'Today';
   if (diff === 1) return 'Tomorrow';

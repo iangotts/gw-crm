@@ -4,8 +4,9 @@ import { dollars, payChip, validAmount } from './money';
 describe('money display', () => {
   it('formats dollars and cents', () => {
     expect(dollars('1666.67')).toBe('$1,666.67');
-    expect(dollars('0')).toBe('$0.00');
-    expect(dollars('-50.00')).toBe('-$50.00');
+    expect(dollars('0')).toBe('$0');
+    expect(dollars('-50.00')).toBe('-$50');
+    expect(dollars('300.00')).toBe('$300');
     expect(dollars(null)).toBe('');
   });
   it('validates amounts like the server', () => {

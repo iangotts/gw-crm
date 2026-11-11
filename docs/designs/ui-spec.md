@@ -38,15 +38,19 @@ The style guide's colour table was empty. The palette was later moved to the bra
 ## Pipeline screen
 
 - Dark header with the GW-CRM name, a band switcher and Sign out, over a 3px gold rule.
-- Six columns by stage, each with a count. A gig card is a ticket: dark date stub on the left, title, contact, budget and source tags. Confirmed and Played cards show a payment chip.
+- Six columns by stage, each with a count. A gig card is a ticket: dark date stub on the left, title, venue (left out when it is the same as the title), contact, fee and source tags. Confirmed and Played cards show a payment chip.
+- The fee chip shows the quoted amount alone. With no quote it shows the fee note, cut to 24 characters, or the lead's budget. The full note is in the drawer and on hover.
 - Drag a card to another column, or use the select on the card. The move shows at once and reverts with a message if the server refuses.
-- Played and Lost show the latest 8 with a Show all button.
+- Order answers "what needs me next". New, Evaluating and In conversation show upcoming dates first, soonest at the top, then undated leads. Leads whose date has passed are folded behind a "Show N with past dates" button. Confirmed shows past gigs first, so they get marked played, then upcoming ones.
+- Played and Lost show the latest 8, newest first, with a Show all button.
+- Search shows past-dated leads too.
 - Search covers gig, venue and contact names.
-- Flags on cards: postponed, reply owed, past date, missing details.
+- Flags on cards: Postponed; Played? on a booked gig whose date has passed; Past date on an open lead; Missing details on an upcoming booked gig with no date, start time, contact or fee; Reply by or Reply overdue; Follow up due.
 
 ## Gig drawer and New gig
 
-- The drawer holds stage, date, times, people and place, money, calendar, follow-up, lead details, notes and history.
+- The drawer holds, in order: details (stage, date, times), people and place, follow-up, lead details, notes, money (including the fee quoted and fee note), calendar, activity and links.
+- A row of buttons at the top jumps to Details, Follow-up, Money, Activity and Links.
 - Save sends only the fields that changed.
 - Archive needs a second click to confirm.
 - New gig asks for a name first. Contact and venue are search boxes that can add a new record inline.
@@ -54,7 +58,8 @@ The style guide's colour table was empty. The palette was later moved to the bra
 
 ## Money (in the gig drawer)
 
-- Shows the fee, what was received, what is still to come, and a status: Unpaid, Part paid, Paid or Overpaid.
+- Starts with the fee quoted and fee note, then shows what was received, what is still to come, and a status: Unpaid, Part paid, Paid or Overpaid.
+- Money shows whole dollars without cents ("$2,500") and cents only when there are some, everywhere in the app.
 - Plan deposit and balance takes a deposit percent. It rounds the deposit once and makes the balance the remainder, so the two always add up to the fee.
 - Other payment adds a single payment with a type, an amount and a due date.
 - A person marks each payment paid with the date received. Nothing is guessed from a bank.
@@ -87,7 +92,8 @@ The style guide's colour table was empty. The palette was later moved to the bra
 
 ## Login
 
-- Email and password. A person in more than one band picks one after signing in. The band switcher in the header changes it later.
+- Email and password. A person in more than one band picks one after signing in. The band switcher in the header changes it later, and shows a short name ("Jane Blonde").
+- Under the button: "Forgotten your password? Ask your band's admin to set a new one", until password reset is built.
 
 ## Phone layout
 
@@ -105,10 +111,10 @@ The style guide's colour table was empty. The palette was later moved to the bra
 
 The header has five pages: Pipeline, Contacts, Follow-ups, Templates, Links. On a phone they become a tab bar at the bottom, and the New buttons float above it.
 
-- **Contacts:** one row per person with email, phone, tags, open gigs and when they were last contacted. Tag chips filter the list. A person whose email is unsubscribed, bounced or suppressed shows a red Do not email chip.
+- **Contacts:** one row per person with email, phone, tags, open gigs and when they were last contacted. Tag chips filter the list. Tags show as words ("Event organizer"), though they are stored as typed. A person whose email is unsubscribed, bounced or suppressed shows a red Do not email chip.
 - **Contact drawer:** quick call and email links, their gigs, then Activity, Links and Details, in that order, because the log is what people come back to.
 - **Activity log:** choose Call, Voicemail, Text, Email, Note or To do, write what happened, and log it. Email and text can start from a template. A to-do has a due date and a checkbox.
-- **Follow-ups:** three lists. Replies owed. To follow up (to-dos and gigs to chase). Payments (unpaid payments with a due date, and played gigs that still owe money). Overdue rows have a red edge. Each row has one button: Replied, Done or Marked paid.
+- **Follow-ups:** three lists. Replies owed. To follow up (to-dos and gigs to chase). Payments (unpaid payments with a due date, and played gigs that still owe money). Overdue rows have a red edge and say "Overdue by 3 days", or "Overdue since Oct 2024" after a month. Each row has one button: Replied, Done or Marked paid.
 - **Templates:** cards with Copy and Edit. Placeholders {first\_name}, {name}, {band} and {gig} fill in when used.
 - **Links:** the band's shareable pages, each with how often it was sent and clicked. In a contact or gig, the link builder shows the tagged address as you type, then creates and copies it.
 - **Plain-language rule for links:** the screen says the address names the band, how it was sent and the campaign, not the person.
