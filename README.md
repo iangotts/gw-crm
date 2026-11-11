@@ -6,7 +6,7 @@ The full plan, decisions and import rules are in the "GW-CRM: Gap Review and Bui
 
 ## Status
 
-Phase 1 is done: the tenant-aware Postgres schema, with row-level security and tests. Phase 2 is done: the Node and TypeScript backend with login, sessions and tenant switching. The screens come next (phase 3).
+Phases 1 to 9 are built: the schema, backend, screens, UTM links, subscribe and unsubscribe, one-to-one email, the Google Calendar link, money and the GW-GIG import. Phase 10, deploying to Railway, has started. The current status is in [docs/designs/build-plan.md](docs/designs/build-plan.md).
 
 ## Backend
 
@@ -184,3 +184,50 @@ cd web && npm install && npm run dev
 For production, run `cd web && npm run build`, then start the API. It serves `web/dist` and falls back to `index.html` for every page that is not under `/api`.
 
 Checks: `npm test` (backend, needs `DATABASE_URL`) and `cd web && npm test` (screen logic).
+
+## Local Interface & Invariants
+
+- `vitest.config.ts`: backend test config. Collects `test/**/*.test.ts` only, runs files one at a time (`fileParallelism: false`) because the tests share one database, with a 20 s timeout.
+- `tsconfig.build.json`: compiles `src/` to `dist/` (`npm run build`). `dist/server.js` and `dist/cli/migrate.js` are what the container runs.
+- `Dockerfile`: two-stage `node:22-slim` build of the API and `web/dist` into one image. Runs as `node`, exposes 3000, and on every start runs `node dist/cli/migrate.js` before `node dist/server.js`.
+- `railway.json`: Dockerfile builder, health check `/api/health`, restart on failure (5 retries).
+- `.env.example`: the documented environment variables (`DATABASE_URL`, `PORT`, `ALLOWED_ORIGINS`, `COOKIE_SECURE`, `SESSION_DAYS`, `SCRYPT_LOG_N`, `FORM_SECRET`, `PUBLIC_URL`, `EMAIL_PROVIDER`, `SENDGRID_API_KEY`, `EMAIL_DAILY_CAP`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `CALENDAR_KEY`).
+
+## Subdirectories & System Boundaries
+
+- db: [./db/README.md](./db/README.md) - PostgreSQL schema (migrations `0001_foundation` to `0012_money`) and seed. Defines the `crm_app` role, row-level security on every tenant table, the `SECURITY DEFINER` login and public-form functions, and the `gig_money` view.
+  - [./db/migrations/README.md](./db/migrations/README.md), [./db/seeds/README.md](./db/seeds/README.md)
+- scripts: [./scripts/README.md](./scripts/README.md) - `db.sh` (`migrate`, `seed`, `test`, `status`), a psql wrapper driven by `DATABASE_URL`.
+- src: [./src/README.md](./src/README.md) - the Fastify API: config, RLS-aware database helpers (`withAnonymous`, `withUser`, `withTenant`, `withSystem`), sessions, passwords, tokens, email providers, Google client and calendar sync, `buildApp` and the server entry point.
+  - [./src/routes/README.md](./src/routes/README.md) - the `/api/*` handlers, one `register*Routes` per file.
+  - [./src/import/README.md](./src/import/README.md) - the GW-GIG CSV import: pure `buildPlan`, then an idempotent `loadPlan`.
+  - [./src/cli/README.md](./src/cli/README.md) - `migrate`, `create-user` and `import` commands, run with the owner login.
+- web: [./web/README.md](./web/README.md) - separate Vite + React 18 package. Dev server on 5173 proxies `/api` to 3000.
+  - [./web/src/README.md](./web/src/README.md) - the single-page app. Every server call goes through `api()` to same-origin `/api/*`.
+- test (not documented, test-only): vitest API tests, need `DATABASE_URL`.
+- db/tests (not documented, test-only): `tenant_isolation.sql`, run by `scripts/db.sh test`.
+
+## Global Invariants
+
+- Tenant data is only reached through `withTenant` (`src/db.ts`), which runs `SET LOCAL ROLE crm_app` and sets `app.user_id`, `app.tenant_ids` and `app.role` for one transaction. The tenant comes from the session, never the request body.
+- With no tenant set, `visible_tenants()` is empty and queries return nothing (`db/migrations/0001_foundation.sql`). Composite `(tenant_id, id)` foreign keys stop cross-tenant links.
+- `withSystem` (owner connection, bypasses RLS) is for sessions, migrations, the seed and the import only (`src/cli`, `src/import/load.ts`).
+- The role is re-read from `membership` on every request (`src/auth.ts:authenticate`). `read_only` cannot write; admin-only settings are checked in the routes and in RLS.
+- Money sums are done in the database in exact decimal (`gig_money` view). The browser only formats and pre-checks amounts (`web/src/money.ts:validAmount` mirrors the server rule).
+- Migrations are append-only and applied in filename order, by `scripts/db.sh migrate` or `src/cli/migrate.ts` (the container path, which needs no psql).
+- Bubble exports and import reports hold personal data and stay out of git (`.gitignore`: `exports/`, `*.csv`, `import-report/`).
+
+## Global Side Effects
+
+- PostgreSQL at `DATABASE_URL`: all application state, sessions and import id maps.
+- SendGrid v3 mail send (`src/email.ts:sendGridProvider`) when `SENDGRID_API_KEY` is set. Without a key, local work keeps mail in memory and production refuses to send.
+- Google OAuth and Calendar v3 (`src/google.ts`, `src/calendar.ts`) when the Google keys are set. Stored refresh tokens are encrypted with `CALENDAR_KEY`.
+- The server listens on `0.0.0.0:PORT`, serves `web/dist` when present, and runs an hourly session purge.
+- The import writes `report.md`, `spot-check.md`, `flags.csv` and `load.json` to `--out` (default `import-report/`).
+
+## System Verification
+
+- Run: `npm test` (backend vitest, needs `DATABASE_URL`)
+- Run: `npm run db:test` (SQL tenant isolation tests, needs `DATABASE_URL`)
+- Run: `npm --prefix web install && npm --prefix web test` (screen logic)
+- Run: `npm run typecheck`
