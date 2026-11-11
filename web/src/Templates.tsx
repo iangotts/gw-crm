@@ -53,7 +53,7 @@ export function Templates({ role }: { role: Role }) {
     <>
       <div className="page-head">
         <h1>
-          Templates<span className="count">{list?.length ?? 0}</span>
+          Templates{list && <span className="count">{list.length}</span>}
         </h1>
         <button className="btn btn-secondary" onClick={() => setSettingsOpen(true)}>
           Email settings
@@ -72,6 +72,7 @@ export function Templates({ role }: { role: Role }) {
           {error}
         </p>
       )}
+      {!list && !error && <p className="hint">Loading</p>}
       {list && list.length === 0 && (
         <p className="empty">{canEdit ? 'No templates yet. Add your usual pitch or decline with New template.' : 'No templates yet.'}</p>
       )}
@@ -98,6 +99,11 @@ export function Templates({ role }: { role: Role }) {
         ))}
       </div>
 
+      {canEdit && (
+        <button className="btn btn-primary fab" onClick={() => setDraft({ ...blank })}>
+          New template
+        </button>
+      )}
       {draft && (
         <TemplateDialog
           draft={draft}

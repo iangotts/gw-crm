@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { slug, tagUrl } from './links';
+import { slug, tagUrl } from './utm';
 
 describe('link preview', () => {
   it('slugs values the way the server does', () => {

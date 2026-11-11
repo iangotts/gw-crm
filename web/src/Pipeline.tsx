@@ -77,7 +77,7 @@ export function Pipeline({ role }: { role: Role }) {
     <>
       <div className="page-head">
         <h1>
-          Pipeline<span className="count">{gigs.length === 1 ? '1 gig' : `${gigs.length} gigs`}</span>
+          Pipeline{loaded && <span className="count">{gigs.length === 1 ? '1 gig' : `${gigs.length} gigs`}</span>}
         </h1>
         <label className="sr-only" htmlFor="gig-search">
           Search gigs
@@ -102,6 +102,7 @@ export function Pipeline({ role }: { role: Role }) {
           {loadError}
         </p>
       )}
+      {!loaded && !loadError && <p className="hint">Loading</p>}
       {!canEdit && (
         <p className="hint" style={{ marginTop: -8 }}>
           You have read-only access to this band.

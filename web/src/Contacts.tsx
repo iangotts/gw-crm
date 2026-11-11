@@ -74,7 +74,7 @@ export function Contacts({ role }: { role: Role }) {
     <>
       <div className="page-head">
         <h1>
-          Contacts<span className="count">{rows.length}{more ? '+' : ''}</span>
+          Contacts{loaded && <span className="count">{rows.length}{more ? '+' : ''}</span>}
         </h1>
         <label className="sr-only" htmlFor="contact-search">
           Search contacts
@@ -122,6 +122,7 @@ export function Contacts({ role }: { role: Role }) {
           {error}
         </p>
       )}
+      {!loaded && !error && <p className="hint">Loading</p>}
 
       <ul className="people">
         {rows.map((c) => (

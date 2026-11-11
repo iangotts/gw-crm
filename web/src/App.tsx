@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, setUnauthorizedHandler } from './api';
 import { BandPicker, Login } from './Login';
-import { BandContext } from './band';
+import { BandContext, shortBandName } from './band';
 import { Contacts } from './Contacts';
 import { FollowUps } from './FollowUps';
 import { Links } from './Links';
@@ -73,16 +73,18 @@ function Crm() {
                 <label className="sr-only" htmlFor="band">
                   Band
                 </label>
-                <select id="band" value={active.id} onChange={(e) => void pick(e.target.value)}>
+                <select id="band" value={active.id} title={active.name} onChange={(e) => void pick(e.target.value)}>
                   {me.tenants.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.name}
+                      {shortBandName(t.name)}
                     </option>
                   ))}
                 </select>
               </>
             ) : (
-              <span className="band-name">{active.name}</span>
+              <span className="band-name" title={active.name}>
+                {shortBandName(active.name)}
+              </span>
             )}
           </div>
           <nav className="nav" aria-label="Main">
@@ -94,7 +96,7 @@ function Crm() {
           </nav>
           <div className="header-end">
             <span className="who">{me.user.name ?? me.user.email}</span>
-            <button className="btn btn-ghost" onClick={() => setCalendar({})}>
+            <button className="btn btn-ghost header-calendar" onClick={() => setCalendar({})}>
               Calendar
             </button>
             <button className="btn btn-ghost" onClick={() => void logout()}>

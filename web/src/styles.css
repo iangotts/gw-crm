@@ -460,6 +460,9 @@ textarea {
   display: none;
 }
 .board {
+  /* Positioned so the screen-reader-only labels on the cards stay inside the board's scroll area.
+     Without it they are placed against the page and stretch the whole page sideways. */
+  position: relative;
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(290px, 1fr);
@@ -747,6 +750,10 @@ textarea {
   .nav {
     display: none;
   }
+  /* The phone header is one row: name, band switcher, Sign out. Calendar set-up is done on a computer. */
+  .header-calendar {
+    display: none;
+  }
   .who {
     display: none;
   }
@@ -757,8 +764,9 @@ textarea {
     font-size: 26px;
     width: 100%;
   }
+  /* The search box gets a row of its own, so the sort and other buttons can't squeeze it. */
   .search {
-    flex: 1;
+    flex: 1 1 100%;
     min-width: 0;
   }
   .tabs {

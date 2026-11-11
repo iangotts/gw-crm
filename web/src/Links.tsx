@@ -38,7 +38,7 @@ export function Links({ role }: { role: Role }) {
     <>
       <div className="page-head">
         <h1>
-          Links<span className="count">{list?.length ?? 0}</span>
+          Links{list && <span className="count">{list.length}</span>}
         </h1>
         {canEdit && (
           <button className="btn btn-primary" onClick={() => setDraft({ id: null, name: '', url: '', active: true })}>
@@ -54,6 +54,7 @@ export function Links({ role }: { role: Role }) {
           {error}
         </p>
       )}
+      {!list && !error && <p className="hint">Loading</p>}
       {list && list.length === 0 && <p className="empty">{canEdit ? 'No links yet. Add your website with New link.' : 'No links yet.'}</p>}
       <div className="tpl-grid">
         {list?.map((t) => (
@@ -77,6 +78,11 @@ export function Links({ role }: { role: Role }) {
           </article>
         ))}
       </div>
+      {canEdit && (
+        <button className="btn btn-primary fab" onClick={() => setDraft({ id: null, name: '', url: '', active: true })}>
+          New link
+        </button>
+      )}
       {draft && (
         <TargetDialog
           draft={draft}

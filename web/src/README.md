@@ -29,7 +29,7 @@ Pure helpers (covered by `*.test.ts`):
 
 - `stages.ts`: `Stage`, `STAGES`, `stageLabel`, `groupByStage`, `DateParts`, `dateParts`, `todayIso`, `isBefore`, `money`, `feeText`, `Flag`, `flagsFor`, `shortDate`.
 - `money.ts`: `PayState`, `dollars`, `STATE_LABEL`, `payChip(stage, state)`, `validAmount(s)`.
-- `links.ts`: `slug(value)`, `tagUrl(raw, utm)`, `MEDIA`.
+- `utm.ts`: `slug(value)`, `tagUrl(raw, utm)`, `MEDIA`.
 - `calendar.ts`: `Busy`, `busyText(b, tz)`, `memberLine(m, tz)`.
 - `activity.ts`: `LOG_KINDS`, `kindLabel`, `TEMPLATE_KINDS`, `templateKindLabel`, `PLACEHOLDERS`, `renderTemplate(text, vars)`, `hasUnfilled(text)`, `contactName`, `ago`, `Due`, `dueTone`, `dueText`, `dateOnlyToIso`, `localToIso`.
 

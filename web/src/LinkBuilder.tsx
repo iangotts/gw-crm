@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 import { ago } from './activity';
 import { api, errorText } from './api';
 import { useBand } from './band';
-import { MEDIA, slug, tagUrl } from './links';
+import { MEDIA, slug, tagUrl } from './utm';
 import type { BuiltLink, LinkTarget } from './types';
 
 interface Props {
