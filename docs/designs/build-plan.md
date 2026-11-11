@@ -2,7 +2,7 @@
 
 Nov 10, 2026 · @Ian
 
-Phases 1 to 9 are built and phase 10, the cutover, has started. The work is on the `phase-1-schema` branch, which is the repo's default branch; `main` points at the same commit.
+Phases 1 to 9 are done, including the import of fans and gigs from GW-GIG, and phase 10, the cutover, has started. The work is on the `phase-1-schema` branch, which is the repo's default branch; `main` points at the same commit.
 
 ## Phases and status
 
@@ -16,7 +16,7 @@ Phases 1 to 9 are built and phase 10, the cutover, has started. The work is on t
 | 6 | Individual email | Done, on SendGrid |
 | 7 | Google Calendar link | Done: free/busy sharing per person, and events for confirmed gigs |
 | 8 | Gig to money | Done: fee, deposit and balance plan, payments marked paid by hand. No invoices or ledger |
-| 9 | Import and rehearsal | Import built. Reports from a run on 6 Nov are in `import-report/`. Confirm the scratch-database rehearsal (run twice, spot-check by hand) before the production load |
+| 9 | Import and rehearsal | Done: fans and gigs imported from GW-GIG |
 | 10 | Cutover | Started: Dockerfile, Railway config and a migrator that needs no psql. Not yet deployed |
 
 ## Phase 3 screens
