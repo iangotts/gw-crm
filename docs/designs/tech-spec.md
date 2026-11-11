@@ -81,7 +81,16 @@ Most routes need a login and an active band, and writes also need a member or ad
 | Venues | GET and POST /api/venues |
 | Public (no login) | GET /api/public/band/:slug, POST /api/public/band/:slug/subscribe, GET and POST /api/public/unsubscribe/:token, POST /api/public/resubscribe/:token |
 
-There is no token or service-account login yet. Every caller is a person with a session cookie. The Band Ops agents need one before lead triage can write to the CRM (see the build plan's open items).
+## Agent access
+
+Decided 10 Nov 2026: the Band Ops agents log in as a service-account user with a fixed role, not with an API token.
+
+- The service account is an ordinary `app_user`, for example `agent-lead-triage@…`, created with `npm run create-user` and a membership in each band it works for. Its password (12 characters or more) is stored as a Paperclip secret for that agent only.
+- The agent calls `POST /api/login`, keeps the `gwcrm_session` cookie, and calls `POST /api/session/tenant` to pick the band. When a call returns 401 because the session ended, it logs in again.
+- Requests with no `Origin` header pass the origin check, so a server-side agent needs no entry in `ALLOWED_ORIGINS`.
+- Everything the agent writes is attributed to the service account (`created_by`), so its actions show separately in the activity log.
+- Role: `member` is the narrowest role that can create contacts and gigs. It can also send email (`POST /api/email/send`) and edit any gig. Nothing in the API stops that, so until a narrower role exists, the "nothing sent without approval" rule depends on the agent's own approval gates. `read_only` can't write, and `admin` must not be used.
+- Open: whether to add a dedicated agent role in the database that can create and update contacts, gigs and activity but cannot send email or change payments.
 
 ## Email
 

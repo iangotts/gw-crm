@@ -37,7 +37,7 @@ Phases 1 to 9 are done, including the import of fans and gigs from GW-GIG, and p
 - Cutover date.
 - Ian's GW-GIG checks: privacy test, key rotation, subscribe page behaviour, and anything else that creates fans or gigs.
 - To build: password reset and user invite screens (use `npm run create-user` for now), a per-account login lockout, and a combined admin activity view.
-- To build for the Band Ops agents: a token or service-account login, so the lead-triage agent can create contacts and gigs. Today every caller is a person with a session cookie.
+- Band Ops agents: decided 10 Nov 2026 to use a service-account user with a fixed role (see the tech spec, "Agent access"). To do: create the user, store its password as a Paperclip secret, and decide whether `member` is narrow enough or a dedicated agent role is needed.
 - Browser tests: the earlier plan named Playwright, but none are in the repo yet.
 
 Decided since the last version: the email provider is SendGrid, and the Google Calendar link shares busy times only and adds confirmed gigs.
