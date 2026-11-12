@@ -50,7 +50,7 @@ The style guide's colour table was empty. The palette was later moved to the bra
 ## Gig drawer and New gig
 
 - The drawer holds, in order: details (stage, date, times), people and place, follow-up, lead details, notes, money (including the fee quoted and fee note), calendar, activity and links.
-- A row of buttons at the top jumps to Details, Follow-up, Money, Activity and Links.
+- A row of buttons in the drawer's header jumps to Details, Follow-up, Money, Activity and Links. The header stays in view while scrolling, so the row is always there.
 - Save sends only the fields that changed.
 - Archive needs a second click to confirm.
 - New gig asks for a name first. Contact and venue are search boxes that can add a new record inline.

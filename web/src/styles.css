@@ -651,6 +651,7 @@ textarea {
   padding: 16px 20px;
   display: flex;
   align-items: flex-start;
+  flex-wrap: wrap;
   gap: 12px;
   position: sticky;
   top: 0;
@@ -669,12 +670,13 @@ textarea {
   padding: 8px 20px 20px;
   flex: 1;
 }
-/* Jump buttons at the top of the gig drawer. Sections leave room for the sticky header when jumped to. */
+/* Jump buttons in the gig drawer's sticky header, on a row of their own under the title. */
 .jump {
+  flex: 1 1 100%;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 8px 0 4px;
+  margin-top: -4px;
 }
 .jump button {
   background: var(--dim);
@@ -693,7 +695,7 @@ textarea {
   outline-offset: 2px;
 }
 .sheet .section {
-  scroll-margin-top: 80px;
+  scroll-margin-top: 140px;
 }
 .sheet-foot {
   position: sticky;

@@ -60,6 +60,19 @@ const JUMPS: [string, string][] = [
   ['gig-activity', 'Activity'],
   ['gig-links', 'Links'],
 ];
+
+/**
+ * The jump row sits in the drawer's sticky header, so it stays in view. Scroll the drawer so the section's
+ * heading lands just under that header, however tall a long gig name makes it.
+ */
+function jumpTo(from: HTMLElement, target: string): void {
+  const sheet = from.closest('.sheet');
+  const head = sheet?.querySelector('.sheet-head');
+  const el = document.getElementById(target);
+  if (!sheet || !head || !el) return;
+  const top = sheet.scrollTop + el.getBoundingClientRect().top - sheet.getBoundingClientRect().top - head.getBoundingClientRect().height - 8;
+  sheet.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+}
 export function GigDrawer({ id, canEdit, onClose, onSaved, onArchived }: Props) {
   const [detail, setDetail] = useState<GigDetail | null>(null);
   const [form, setForm] = useState<Form>({});
@@ -154,17 +167,19 @@ export function GigDrawer({ id, canEdit, onClose, onSaved, onArchived }: Props) 
           <button className="btn btn-ghost" onClick={onClose}>
             Close
           </button>
-        </div>
-
-        {detail && (
-          <div className="sheet-body">
+          {detail && (
             <nav className="jump" aria-label="Sections of this gig">
               {JUMPS.map(([target, label]) => (
-                <button key={target} type="button" onClick={() => document.getElementById(target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+                <button key={target} type="button" onClick={(e) => jumpTo(e.currentTarget, target)}>
                   {label}
                 </button>
               ))}
             </nav>
+          )}
+        </div>
+
+        {detail && (
+          <div className="sheet-body">
             <div className="section" id="gig-details" style={{ borderTop: 0 }}>
               {text('title', 'Gig name')}
               <div className="grid-2">
