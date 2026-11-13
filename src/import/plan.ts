@@ -2,7 +2,7 @@
 // Pure: no database and no files in here, so it can be tested and rehearsed without touching either.
 import { localToInstant } from '../caltime.js';
 import type { Row } from './csv.js';
-import { BUBBLE_TZ, bubbleDate, bubbleInstant, normalizeEmail, normalizePhone, parseFee, roleKind, tidyCase, timeOfDay, venueKey, yes } from './rules.js';
+import { BUBBLE_TZ, bubbleDate, bubbleInstant, normalizeEmail, normalizePhone, parseFee, gigTimes, roleKind, tidyCase, venueKey, yes } from './rules.js';
 
 export interface Exports {
   Fans: Row[];
@@ -307,9 +307,10 @@ export function buildPlan(x: Exports, rules: Rules): Plan {
       flag('Gig', id, title, `No linked contact, so one was made from the gig's booking details (${bName ?? bEmail}).`);
     }
     const archived = (g['Archive'] ?? '').trim().toUpperCase() === 'ARCHIVED';
+    const times = gigTimes(g['time-loadin'] ?? '', g['time-start'] ?? '', g['time-end'] ?? '');
     const row: GigRow = {
       legacy: id, title, stage, postponed: statusText === 'POSTPONED', lostReason: statusText === 'CANCELED' ? 'canceled' : null, eventDate: d.date,
-      loadIn: timeOfDay(g['time-loadin'] ?? ''), start: timeOfDay(g['time-start'] ?? ''), end: timeOfDay(g['time-end'] ?? ''), platform: blank(g['Source']), tag: blank(g['GigTag']),
+      loadIn: times.loadIn, start: times.start, end: times.end, platform: blank(g['Source']), tag: blank(g['GigTag']),
       notes: notesParts.length ? notesParts.join('\n\n') : null, feeQuoted: quote.amount, feeNote, archivedAt: archived ? (bubbleInstant(g['Modified Date'] ?? '') ?? bubbleInstant(g['Creation Date'] ?? '')) : null,
       createdAt: bubbleInstant(g['Creation Date'] ?? ''), venue: g['Venue'] ? (venueCanon.get(g['Venue']) ?? null) : null, contact,
     };

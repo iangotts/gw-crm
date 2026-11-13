@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseCsv } from '../src/import/csv.js';
-import { bubbleDate, bubbleInstant, normalizeEmail, normalizePhone, parseFee, roleKind, tidyCase, timeOfDay, venueKey } from '../src/import/rules.js';
+import { bubbleDate, bubbleInstant, gigTimes, normalizeEmail, normalizePhone, parseFee, roleKind, tidyCase, timeOfDay, venueKey } from '../src/import/rules.js';
 
 describe('csv', () => {
   it('reads quotes, doubled quotes, line breaks inside a field and a byte-order mark', () => {
@@ -36,6 +36,20 @@ describe('dates and times', () => {
     expect(timeOfDay('12:15am')).toBe('00:15:00');
     expect(timeOfDay('7pm')).toBe('19:00:00');
     for (const bad of ['', 'late', '25:00', '13pm']) expect(timeOfDay(bad)).toBeNull();
+  });
+  it('reads gig times without am/pm as the band means them', () => {
+    // A 4 pm show with a 1 pm load-in, typed with no am/pm.
+    expect(gigTimes('1:00', '4:00', '6:00')).toEqual({ loadIn: '13:00:00', start: '16:00:00', end: '18:00:00' });
+    // The end runs past the start: 12:30 to 4 pm, and 9:30 pm to midnight.
+    expect(gigTimes('', '12:30', '4:00')).toEqual({ loadIn: null, start: '12:30:00', end: '16:00:00' });
+    expect(gigTimes('3:00', '9:30', '12:00')).toEqual({ loadIn: '15:00:00', start: '21:30:00', end: '00:00:00' });
+    // A morning load-in before a noon start stays morning.
+    expect(gigTimes('8:30', '12:00', '4:00')).toEqual({ loadIn: '08:30:00', start: '12:00:00', end: '16:00:00' });
+    expect(gigTimes('11:00', '4:00', '8:00')).toEqual({ loadIn: '11:00:00', start: '16:00:00', end: '20:00:00' });
+    // Written with am/pm or on a 24-hour clock: kept as written.
+    expect(gigTimes('10am', '11am', '1pm')).toEqual({ loadIn: '10:00:00', start: '11:00:00', end: '13:00:00' });
+    expect(gigTimes('13:00', '16:00', '19:00')).toEqual({ loadIn: '13:00:00', start: '16:00:00', end: '19:00:00' });
+    expect(gigTimes('', '', '')).toEqual({ loadIn: null, start: null, end: null });
   });
 });
 

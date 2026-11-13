@@ -48,6 +48,52 @@ export function timeOfDay(s: string): string | null {
   return `${pad(h)}:${pad(min)}:00`;
 }
 
+export interface GigTimes {
+  loadIn: string | null;
+  start: string | null;
+  end: string | null;
+}
+
+const minutes = (t: string): number => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
+const clock = (m: number): string => `${pad(Math.floor(m / 60) % 24)}:${pad(m % 60)}:00`;
+const isBare = (s: string): boolean => /^\s*(\d{1,2})(?::\d{2})?\s*$/.test(s);
+
+/**
+ * Gig times as the band means them when am/pm was left off. GW-GIG often had "4:00" for a 4 pm show.
+ * - A show start from 1 to 11 is pm. Bands rarely play mornings, and 12 stays noon.
+ * - The end is the first reading after the start: "4:00" after a 12:30 start is 4 pm, "12:00" after 9:30 pm is midnight.
+ * - A load-in is the later reading that is still no later than the start: "1:00" before a 6:30 pm show is 1 pm,
+ *   "8:30" before a noon start stays 8:30 am.
+ * A time written with am or pm, or as 13:00 or later, is kept as written.
+ */
+export function settleGigTimes(t: GigTimes, bare: { loadIn: boolean; start: boolean; end: boolean }): GigTimes {
+  const out: GigTimes = { ...t };
+  const hour = (v: string): number => Number(v.slice(0, 2));
+  if (out.start && bare.start && hour(out.start) >= 1 && hour(out.start) <= 11) out.start = clock(minutes(out.start) + 720);
+  const s = out.start ? minutes(out.start) : null;
+  if (out.end && bare.end) {
+    const e = minutes(out.end);
+    const h = hour(out.end);
+    const options = [e, ...(h >= 1 && h <= 11 ? [e + 720] : []), ...(h === 12 ? [e + 720] : [])];
+    const after = s === null ? (h >= 1 && h <= 11 ? e + 720 : e) : options.find((o) => o > s);
+    if (after !== undefined) out.end = clock(after);
+  }
+  if (out.loadIn && bare.loadIn && s !== null) {
+    const l = minutes(out.loadIn);
+    const h = hour(out.loadIn);
+    if (h >= 1 && h <= 11 && l + 720 <= s) out.loadIn = clock(l + 720);
+  }
+  return out;
+}
+
+/** Load-in, start and end from the export, read together so a missing am/pm is settled as the band means it. */
+export function gigTimes(loadIn: string, start: string, end: string): GigTimes {
+  return settleGigTimes(
+    { loadIn: timeOfDay(loadIn), start: timeOfDay(start), end: timeOfDay(end) },
+    { loadIn: isBare(loadIn), start: isBare(start), end: isBare(end) },
+  );
+}
+
 /** A plain amount ($, commas allowed) goes to the number. Everything else is kept as typed. */
 export function parseFee(raw: string): { amount: string | null; text: string | null } {
   const s = raw.trim();

@@ -15,6 +15,7 @@ Turns the GW-GIG (Bubble) CSV exports into GW-CRM rows and loads them. Three of 
   - `bubbleDate(s)` parses `"Dec 9, 2022 12:00 am"` or `"May 27, 2024"` into a `BubbleDate`. It returns null for impossible dates.
   - `bubbleInstant(s)` returns an ISO instant in `BUBBLE_TZ`, using `12:00` when there is no time.
   - `timeOfDay(s)` returns `HH:MM:00` or null.
+  - `gigTimes(loadIn, start, end)` reads the three together. With no am/pm, a show start from 1 to 11 is pm, the end is the first reading after the start, and a load-in is the later reading that is still no later than the start.
   - `parseFee(raw)` returns `{ amount, text }`. A plain amount (with optional `$` and comma separators) goes to `amount`. Anything else is kept in `text`.
   - `normalizePhone(raw)` returns `{ phone, flag, junk? }`. US numbers become `(415) 555-1234` with an optional ` xNNN` extension. A `+` number with 8 to 15 digits becomes `+digits`.
   - `normalizeEmail(raw)` returns `{ email, bad }`.
